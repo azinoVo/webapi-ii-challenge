@@ -50,7 +50,7 @@ A Blog Post in the database has the following structure:
 }
 ```
 
-### Comment Schema
+### Comment Schema `3.j 
 
 A Comment in the database has the following structure:
 
