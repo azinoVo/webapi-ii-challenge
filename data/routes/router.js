@@ -64,9 +64,76 @@ router.get('/:id', (req, res) => {
         }
     })
     .catch(err => {
-        res.status(500).json({error: "The post information could not be retrieved."})
+        res.status(500).json({error: "The post information could not be retrieved.", err})
     })
 });
+
+router.delete('/:id', (req, res) => {
+    const {id} = req.params;
+
+    db.findById(id)
+    .then(post => {
+        if (post.length > 0) {
+            db.remove(id)
+            .then(records => {
+                res.json(records);
+            })
+            .catch(err => {
+                res.status(500).json({error: "The post could not be removed"}, err);
+            })
+        } else {
+            res.status(404).json({message: "The post with the specified ID does not exist."});
+        }
+    })
+    .catch(err => {
+        res.status(500).send('Error in finding post!', err)
+    })
+});
+
+
+router.put('/:id', (req, res) => {
+    const {id} = req.params;
+    const {title, contents} = req.body;
+
+    const changes = {
+        title: title,
+        contents: contents
+    }
+
+    if (!title || !contents) {
+        res.status(400).json({errorMessage: "Please provide title and contents for the post."});
+    } else {
+        db.findById(id)
+        .then(post => {
+            if (post.length > 0) {
+                db.update(id, changes)
+                .then(record => {
+                    db.findById(id)
+                    .then(post => {
+                        if (post.length > 0) {
+                            res.status(200).json(post)
+                        } else {
+                            res.status(500).json(err)
+                        }
+                    })
+                    .catch(err => {
+                        res.status(404).json({message: "The post with the specified ID does not exist."});
+                    })
+                    // res.status(200).json(record);
+                })
+                .catch(err => {
+                    res.status(500).json({error: "The post information could not be modified.", err})
+                })
+            } else {
+                res.status(404).json({message: "The post with the specified ID does not exist."});
+            }
+        })
+        .catch(err => {
+            res.status(404).json({message: "The post with the specified ID does not exist."});
+        })
+    }
+});
+
 
 
 module.exports = router;
